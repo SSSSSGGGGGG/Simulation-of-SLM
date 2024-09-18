@@ -33,7 +33,6 @@ f_n=f_1/max_value_1
 PhaseProfile=np.arctan(AL*np.cos(f_linear*np.pi))/(np.pi)
 max_index = np.argmax(PhaseProfile)
 max_value = PhaseProfile[max_index]
-PhaseProfile=PhaseProfile/max_value
 
 # Phase profile for the positive/right
 f_=np.arctan(B*(x_/p))

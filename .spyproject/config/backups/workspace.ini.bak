@@ -4,7 +4,7 @@ save_data_on_exit = True
 save_history = True
 save_non_project_files = False
 project_type = 'empty-project-type'
-recent_files = ['..\\.spyder-py3\\temp.py', 'PhaseProfile.py', '..\\appdata\\roaming\\python\\python311\\site-packages\\matplotlib\\pyplot.py', '..\\appdata\\roaming\\python\\python311\\site-packages\\matplotlib\\_pylab_helpers.py']
+recent_files = ['..\\.spyder-py3\\temp.py', 'PhaseProfile.py']
 
 [main]
 version = 0.2.0
