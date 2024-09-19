@@ -71,20 +71,8 @@ for n in range(len(AL)):
     # PhaseProfile_n[-1:] = PhaseProfile_L[::-1]
     PhaseProfile_n=np.concatenate((PhaseProfile_L[::-1], PhaseProfile_R))
     
-    # plt.figure(1)
-    # plt.plot(x,f_linear,label="linear")
-    # plt.plot(x,f_n,label="nonlinear")
-    # ax = plt.gca()
-    # ax.xaxis.set_major_locator(MultipleLocator(0.25))
-    # plt.legend(loc="best")
-    # plt.minorticks_on()
-    # plt.grid(True, linestyle='--')
-    
-    # gray_M=M*gray/255
-    
-    
-    
-    
+
+       
     
     pixelation=[0] * len(x)
     for i in range(len(x)):
@@ -126,6 +114,27 @@ plt.grid(True, linestyle='--')
 plt.ylim([0,1])
 plt.xlim([0,255])
 plt.show()
+
+
+def first_similar_intersection_with_index(arr1, arr2, threshold=1):
+    for i, num1 in enumerate(arr1):
+        for j, num2 in enumerate(arr2):
+            if abs(num1 - num2) <= threshold:
+                return (i, j)
+indices1,indices2=first_similar_intersection_with_index(Mc[0][0], Mc[0][1], threshold=0.002)
+gray1=gray[int(indices1)]
+gray2=gray[int(indices2)]
+print(f"M={AL[0]}: {indices1,gray1},M={AL[1]}: {indices2,gray2}")
+
+# # Calculate the absolute differences
+# differences_1 = np.abs(Mc[0][0] - Mc[0][1])
+# differences_2 = np.abs(Mc[1][0] - Mc[1][1])
+# # Find the indices of the two smallest differences
+# indices1 = np.argmin(differences_1)[:2]
+# indices2 = np.argmin(differences_2)[:2]
+# gray1=gray[int(indices1)]
+# gray2=gray[int(indices2)]
+# print(f"M={AL[0]}: {indices1,gray1},M={AL[1]}: {indices2,gray2}")
 
 # plt.figure(4)
 # plt.plot(x, PhaseProfile / max_value,label="linear")

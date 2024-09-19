@@ -30,4 +30,3 @@ f1=a**2*sp.sinc((a/2)*sp.pi)**2*sp.sin((phi/2)*sp.pi)**2
 equation= f0 - f1
 solutions = sp.solve(equation, phi)
 print("Solutions for phi:", solutions)
-plt.
