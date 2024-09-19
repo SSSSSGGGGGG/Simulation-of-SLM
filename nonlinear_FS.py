@@ -111,7 +111,7 @@ Im=mc*np.conjugate(mc)/len(x)**2
 
 print(Im)
 
-plt.figure(1)
+plt.figure(2)
 plt.plot(gray,Im[0],label="I_0th")
 plt.plot(gray,Im[1],label="I_1th")
 plt.plot(gray,Im[2],label="I_2th")
@@ -119,7 +119,7 @@ plt.legend(loc="best")
 plt.grid(True, linestyle='--')
 plt.show()
 
-# plt.figure(2)
+# plt.figure(4)
 # plt.plot(x, PhaseProfile / max_value,label="linear")
 # plt.plot(x_,PhaseProfile_R,-x_,PhaseProfile_L,label="nonlinear_")
 # plt.legend(loc="best")
