@@ -14,20 +14,17 @@ from matplotlib.ticker import MultipleLocator
 x=np.linspace(-0.5, 0.5,640)  # linear
 x_=np.linspace(0, 0.5,320)    #nonlinear
 
-M=1.007
+M=0.872
 A=1000
 AL=10
-AR=1
+AR=10
 
 p=1
-B=1
-a=0.9
+B=0.1
+a=0.964
 gray=8
-m=[0,1,2]
-gray=[0,8,16,24,32,40,48,56,64,72,80,88,96,
-      104,112,120,128,136,144,152,160,168,
-      176,184,192,200,208,216,224,232,240,
-      248,255]
+m=[0,1,-1]
+gray=np.arange(0,256,1)
 # Phase profile for the linear
 f_linear=2*x/p
 # define nonlinear f_1, f is normalized, which affects phase profile a lot
@@ -69,14 +66,14 @@ PhaseProfile_R=PhaseProfile_R/max_value_R
 # PhaseProfile_n[-1:] = PhaseProfile_L[::-1]
 PhaseProfile_n=np.concatenate((PhaseProfile_L[::-1], PhaseProfile_R))
 
-# plt.figure(1)
-# plt.plot(x,f_linear,label="linear")
-# plt.plot(x,f_n,label="nonlinear")
-# ax = plt.gca()
-# ax.xaxis.set_major_locator(MultipleLocator(0.25))
-# plt.legend(loc="best")
-# plt.minorticks_on()
-# plt.grid(True, linestyle='--')
+plt.figure(1)
+plt.plot(x,f_linear,label="linear")
+plt.plot(x,PhaseProfile_n,label="nonlinear")
+ax = plt.gca()
+ax.xaxis.set_major_locator(MultipleLocator(0.25))
+plt.legend(loc="best")
+plt.minorticks_on()
+plt.grid(True, linestyle='--')
 
 # gray_M=M*gray/255
 PhaseProfile_M=PhaseProfile_n*M
@@ -109,7 +106,7 @@ for k in range(len(m)):
     mc.append(cc)
 Im=mc*np.conjugate(mc)/len(x)**2 
 
-print(Im)
+# print(Im)
 
 plt.figure(2)
 plt.plot(gray,Im[0],label="I_0th")
