@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 21 10:23:34 2024
+
+@author: gaosh
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit, minimize
+from scipy.optimize import least_squares
 
 def linearModel(gray, B, M, A):
     # Generate x domain for the model, scaled based on the input gray length
@@ -47,48 +54,34 @@ gray = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 
 y_data = [0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011, 0.051, 0.133, 0.275,
           0.431, 0.592, 0.73, 0.831, 0.876]
 
-# Initial guess for the parameters
-initial_guess = [0.1, 2, 10]  # B, M, A
-
-# Add bounds to ensure positive values of B, M, and A
-bounds = (0, [np.inf, np.inf, np.inf])
-
-# Step 1: Perform the curve fitting with bounds using curve_fit
-popt, pcov = curve_fit(linearModel, gray, y_data, p0=initial_guess, bounds=bounds)
-
-# Get the fitted values from the model
-y_fitted = linearModel(gray, *popt)
-
-# Calculate RMSE between the fitted curve and the actual y_data
-rmse = calculate_rmse(y_data, y_fitted)
-print(f"Initial fit parameters using curve_fit:\nB = {popt[0]}\nM = {popt[1]}\nA = {popt[2]}")
-print(f"Initial RMSE = {rmse}")
-
-# Step 2: Minimize RMSE using scipy's minimize
-def objective(params):
-    # Objective function to minimize RMSE
+# Define the objective function for least_squares, returning the residuals (difference between model and data)
+def residuals(params, gray, y_data):
     B, M, A = params
     y_pred = linearModel(gray, B, M, A)
-    return calculate_rmse(y_data, y_pred)
+    return y_data - y_pred
+
+# Initial guess for the parameters
+initial_guess = [0.1, 1.06, 9.8]  # B, M, A
 
 # Set parameter bounds (all positive)
-bounds = [(0, np.inf), (0, np.inf), (0, np.inf)]
+bounds = ([0, 0, 0], [2, 2, 1000])
 
-# Run optimization to minimize RMSE
-result = minimize(objective, popt, bounds=bounds)
+# Run least_squares to minimize the residuals
+result = least_squares(residuals, initial_guess, args=(gray, y_data), bounds=bounds)
 
 # Extract optimized parameters
 B_opt, M_opt, A_opt = result.x
 y_fitted_opt = linearModel(gray, B_opt, M_opt, A_opt)
+
+# Calculate RMSE between the optimized fit and y_data
 rmse_opt = calculate_rmse(y_data, y_fitted_opt)
 
-print(f"Optimized parameters after minimizing RMSE:\nB = {B_opt}\nM = {M_opt}\nA = {A_opt}")
+print(f"Optimized parameters after least_squares:\nB = {B_opt}\nM = {M_opt}\nA = {A_opt}")
 print(f"Optimized RMSE = {rmse_opt}")
 
 # Plot the results
 plt.figure(1)
 plt.scatter(gray, y_data, label='Experimental Data', color='blue')
-plt.plot(gray, y_fitted, label=f'Initial Fit (RMSE = {rmse:.4f})', color='red')
 plt.plot(gray, y_fitted_opt, label=f'Optimized Fit (RMSE = {rmse_opt:.4f})', color='green')
 plt.legend()
 plt.xlabel('Gray Level')

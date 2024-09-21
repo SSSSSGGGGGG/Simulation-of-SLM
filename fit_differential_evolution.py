@@ -1,6 +1,13 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sat Sep 21 10:24:53 2024
+
+@author: gaosh
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
-from scipy.optimize import curve_fit, minimize
+from scipy.optimize import least_squares, differential_evolution
 
 def linearModel(gray, B, M, A):
     # Generate x domain for the model, scaled based on the input gray length
@@ -47,49 +54,53 @@ gray = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 
 y_data = [0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011, 0.051, 0.133, 0.275,
           0.431, 0.592, 0.73, 0.831, 0.876]
 
-# Initial guess for the parameters
-initial_guess = [0.1, 2, 10]  # B, M, A
-
-# Add bounds to ensure positive values of B, M, and A
-bounds = (0, [np.inf, np.inf, np.inf])
-
-# Step 1: Perform the curve fitting with bounds using curve_fit
-popt, pcov = curve_fit(linearModel, gray, y_data, p0=initial_guess, bounds=bounds)
-
-# Get the fitted values from the model
-y_fitted = linearModel(gray, *popt)
-
-# Calculate RMSE between the fitted curve and the actual y_data
-rmse = calculate_rmse(y_data, y_fitted)
-print(f"Initial fit parameters using curve_fit:\nB = {popt[0]}\nM = {popt[1]}\nA = {popt[2]}")
-print(f"Initial RMSE = {rmse}")
-
-# Step 2: Minimize RMSE using scipy's minimize
-def objective(params):
-    # Objective function to minimize RMSE
+# Objective function for differential_evolution
+def objective_function(params, gray, y_data):
     B, M, A = params
     y_pred = linearModel(gray, B, M, A)
-    return calculate_rmse(y_data, y_pred)
+    # Return the sum of squared residuals
+    return np.sum((y_data - y_pred) ** 2)
+
+# Initial guess for the parameters
+initial_guess = [9.8, 8.12, 32]  # B, M, A
 
 # Set parameter bounds (all positive)
-bounds = [(0, np.inf), (0, np.inf), (0, np.inf)]
+bounds = [(0, 10), (0, 10), (0, 5000)]  # Bounds for B, M, A
 
-# Run optimization to minimize RMSE
-result = minimize(objective, popt, bounds=bounds)
+# Run differential_evolution
+result = differential_evolution(objective_function, bounds=bounds, args=(gray, y_data))
 
 # Extract optimized parameters
 B_opt, M_opt, A_opt = result.x
 y_fitted_opt = linearModel(gray, B_opt, M_opt, A_opt)
+
+# Calculate RMSE between the optimized fit and y_data
 rmse_opt = calculate_rmse(y_data, y_fitted_opt)
 
-print(f"Optimized parameters after minimizing RMSE:\nB = {B_opt}\nM = {M_opt}\nA = {A_opt}")
+print(f"Optimized parameters after differential_evolution:\nB = {B_opt}\nM = {M_opt}\nA = {A_opt}")
 print(f"Optimized RMSE = {rmse_opt}")
+
+# Use the result of differential_evolution to refine using least_squares
+# Note: Bounds for least_squares must be formatted as ([lower bounds], [upper bounds])
+bounds_ls = (np.array([0, 0, 0]), np.array([10, 10, 5000]))  # Example bounds
+
+result_ls = least_squares(objective_function, result.x, args=(gray, y_data), bounds=bounds_ls)
+
+# Extract refined optimized parameters
+B_refined, M_refined, A_refined = result_ls.x
+y_fitted_refined = linearModel(gray, B_refined, M_refined, A_refined)
+
+# Calculate RMSE for the refined fit
+rmse_refined = calculate_rmse(y_data, y_fitted_refined)
+
+print(f"Refined parameters after least_squares:\nB = {B_refined}\nM = {M_refined}\nA = {A_refined}")
+print(f"Refined RMSE = {rmse_refined}")
 
 # Plot the results
 plt.figure(1)
 plt.scatter(gray, y_data, label='Experimental Data', color='blue')
-plt.plot(gray, y_fitted, label=f'Initial Fit (RMSE = {rmse:.4f})', color='red')
-plt.plot(gray, y_fitted_opt, label=f'Optimized Fit (RMSE = {rmse_opt:.4f})', color='green')
+plt.plot(gray, y_fitted_opt, label=f'Differential Evolution Fit (RMSE = {rmse_opt:.4f})', color='green')
+plt.plot(gray, y_fitted_refined, label=f'Refined Fit (RMSE = {rmse_refined:.4f})', color='red', linestyle='--')
 plt.legend()
 plt.xlabel('Gray Level')
 plt.ylabel('Intensity')
