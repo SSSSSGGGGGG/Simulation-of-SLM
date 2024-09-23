@@ -3,28 +3,47 @@ import matplotlib.pyplot as plt
 from scipy.optimize import minimize
 
 def linearModel(gray, B, M, A):
-    x = np.linspace(-0.5, 0.5, 10000)
-    PhaseProfile = np.arctan(A * np.cos(2 * np.pi * x)) / np.pi
-    max_value = np.max(PhaseProfile)
-    PhaseProfile = PhaseProfile / max_value
-    PhaseProfile_M = PhaseProfile * M
+    x = np.linspace(-0.5, 0.5, len(gray))
+    x_=np.linspace(0, 0.5,len(gray))
+    p=1
+    f_=np.arctan(B*(x_/p))
+    max_index_ = np.argmax(f_)
+    max_value_ = f_[max_index_]
+    f_L=f_/max_value_
+    AL=A
+    PhaseProfile_L=np.arctan(AL*np.cos(f_L*np.pi))/(np.pi)
+    max_index_L = np.argmax(PhaseProfile_L)
+    max_value_L = PhaseProfile_L[max_index_L]
+    PhaseProfile_L=PhaseProfile_L/max_value_L
 
+    # Phase profile for the negtive/left            
+    f_r=np.arctan(B*(-x_/p))
+    min_index_r = np.argmin(f_r)
+    min_value_r = f_r[min_index_r]
+    f_R=f_/min_value_r
+    AR=A
+    PhaseProfile_R=np.arctan(AR*np.cos(f_R*np.pi))/(np.pi)
+    max_index_R = np.argmax(PhaseProfile_R)
+    max_value_R = PhaseProfile_R[max_index_R]
+    PhaseProfile_R=PhaseProfile_R/max_value_R
+    PhaseProfile_n=np.concatenate((PhaseProfile_L[::-1], PhaseProfile_R))
+    a=0.964
     Im = []
     for g in gray:
         gray_M = M * g / 255
-        phaseProfile_C = PhaseProfile_M * gray_M
+        phaseProfile_C = PhaseProfile_n * gray_M
         phase = np.exp(1j * (phaseProfile_C * np.pi))
         cm = np.abs(np.sum(phase))
         Im.append(cm)
 
     Im = np.array(Im)
-    Im = Im / np.max(Im)
+    Im = (a**2)*(Im / np.max(Im))
     return Im.real
 
 def objective_function(params, gray, y_data):
     B, M, A = params
     y_pred = linearModel(gray, B, M, A)
-    weights = 1 / (1 + (y_data - y_data) ** 2)
+    weights = 1 / (1 + (y_data - y_pred) ** 2)
     return np.sum(weights * (y_data - y_pred) ** 2)
 
 # Test data
@@ -34,9 +53,9 @@ y_data = np.array([0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011
 
 # Optimization loop to ensure RMSE is below the threshold
 target_rmse = 0.01
-rmse_opt = np.inf
-initial_guess = [0.1, 1, 10]
-bounds = [(0, 10), (0, 10), (0, 5000)]
+rmse_opt = 0.1
+initial_guess = [0.1, 1, 1000]
+bounds = [(0, 10), (0, 1.2), (0, 1000)]
 
 # Store optimized parameters for future use
 optimized_params_history = []

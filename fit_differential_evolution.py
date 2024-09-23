@@ -12,18 +12,30 @@ from scipy.optimize import least_squares, differential_evolution
 def linearModel(gray, B, M, A):
     # Generate x domain for the model, scaled based on the input gray length
     x = np.linspace(-0.5, 0.5, len(gray))
-    
-    # Phase profile for the linear
-    f_linear = 2 * x
-    f_1 = np.arctan(B * (f_linear / 2))
-    max_value_1 = np.max(f_1)
-    f_n = f_1 / max_value_1  # Normalized
+    x_=np.linspace(0, 0.5,len(gray))
+    p=1
+    f_=np.arctan(B*(x_/p))
+    max_index_ = np.argmax(f_)
+    max_value_ = f_[max_index_]
+    f_L=f_/max_value_
+    AL=A
+    PhaseProfile_L=np.arctan(AL*np.cos(f_L*np.pi))/(np.pi)
+    max_index_L = np.argmax(PhaseProfile_L)
+    max_value_L = PhaseProfile_L[max_index_L]
+    PhaseProfile_L=PhaseProfile_L/max_value_L
 
-    # Phase profile with the nonlinearity
-    PhaseProfile = np.arctan(A * np.cos(f_linear * np.pi)) / np.pi
-    max_value = np.max(PhaseProfile)
-    PhaseProfile = PhaseProfile / max_value
-    PhaseProfile_M = PhaseProfile * M
+    # Phase profile for the negtive/left            
+    f_r=np.arctan(B*(-x_/p))
+    min_index_r = np.argmin(f_r)
+    min_value_r = f_r[min_index_r]
+    f_R=f_/min_value_r
+    AR=A
+    PhaseProfile_R=np.arctan(AR*np.cos(f_R*np.pi))/(np.pi)
+    max_index_R = np.argmax(PhaseProfile_R)
+    max_value_R = PhaseProfile_R[max_index_R]
+    PhaseProfile_R=PhaseProfile_R/max_value_R
+    PhaseProfile_n=np.concatenate((PhaseProfile_L[::-1], PhaseProfile_R))
+    a=0.964
 
     # Smooth pixelation process: smooth transition instead of binary
     pixelation = 1 / (1 + np.exp(-10 * (np.abs(x) - 0.25)))  # Smooth transition around 0.25
@@ -32,7 +44,7 @@ def linearModel(gray, B, M, A):
     Im = []
     for g in gray:
         gray_M = M * g / 255
-        phaseProfile_C = PhaseProfile_M * gray_M
+        phaseProfile_C = PhaseProfile_n * gray_M
         phase = pixelation * np.exp(1j * (phaseProfile_C * np.pi))
         cm = np.abs(np.sum(phase))  # Sum the phases and take the magnitude
         Im.append(cm)
@@ -40,7 +52,7 @@ def linearModel(gray, B, M, A):
     Im = np.array(Im)
     
     # Normalize output to ensure it's between 0 and 1
-    Im = Im / np.max(Im)  # Normalize to the maximum value
+    Im = (a**2)*(Im / np.max(Im))  # Normalize to the maximum value
     Im = np.clip(Im, 0, 1)  # Ensure all values are between 0 and 1
     
     return Im.real  # Only return the real part for fitting purposes
