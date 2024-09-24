@@ -58,19 +58,17 @@ def linearModel(gray, B, M, A):
     return Im.real  # Only return the real part for fitting purposes
 
 def calculate_rmse(y_true, y_pred):
-    """Calculate the Root Mean Square Error (RMSE) between true and predicted values."""
     return np.sqrt(np.mean((y_true - y_pred) ** 2))
 
 # Test data
-gray = [0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255]
-y_data = [0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011, 0.051, 0.133, 0.275,
-          0.431, 0.592, 0.73, 0.831, 0.876]
+gray = np.array([0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255])
+y_data = np.array([0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011, 0.051, 0.133, 0.275,
+                   0.431, 0.592, 0.73, 0.831, 0.876])
 
 # Objective function for differential_evolution
 def objective_function(params, gray, y_data):
     B, M, A = params
     y_pred = linearModel(gray, B, M, A)
-    # Return the sum of squared residuals
     return np.sum((y_data - y_pred) ** 2)
 
 # Initial guess for the parameters
@@ -92,11 +90,15 @@ rmse_opt = calculate_rmse(y_data, y_fitted_opt)
 print(f"Optimized parameters after differential_evolution:\nB = {B_opt}\nM = {M_opt}\nA = {A_opt}")
 print(f"Optimized RMSE = {rmse_opt}")
 
-# Use the result of differential_evolution to refine using least_squares
-# Note: Bounds for least_squares must be formatted as ([lower bounds], [upper bounds])
-bounds_ls = (np.array([0, 0, 0]), np.array([10, 10, 5000]))  # Example bounds
+# Residuals function for least_squares
+def residuals_function(params, gray, y_data):
+    B, M, A = params
+    y_pred = linearModel(gray, B, M, A)
+    return y_data - y_pred  # Return residuals (array)
 
-result_ls = least_squares(objective_function, result.x, args=(gray, y_data), bounds=bounds_ls)
+# Refine the result of differential_evolution using least_squares
+bounds_ls = (np.array([0, 0, 0]), np.array([10, 10, 5000]))  # Example bounds
+result_ls = least_squares(residuals_function, result.x, args=(gray, y_data), bounds=bounds_ls)
 
 # Extract refined optimized parameters
 B_refined, M_refined, A_refined = result_ls.x

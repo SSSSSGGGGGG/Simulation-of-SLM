@@ -14,13 +14,13 @@ from matplotlib.ticker import MultipleLocator
 x=np.linspace(-0.5, 0.5,640)  # linear
 x_=np.linspace(0, 0.5,320)    #nonlinear
 
-M=0.872
+M=0.9929
 A=1000
-AL=10
-AR=10
+AL=599.99
+AR=599.99
 
 p=1
-B=0.1
+B=0.2247
 a=0.964
 gray=8
 m=[0,1,-1]
@@ -108,10 +108,17 @@ Im=mc*np.conjugate(mc)/len(x)**2
 
 # print(Im)
 
+gray_y = np.array([0, 16, 32, 48, 64, 80, 96, 112, 128, 144, 160, 176, 192, 208, 224, 240, 255])
+y_data = np.array([0.93, 0.898, 0.765, 0.643, 0.466, 0.292, 0.138, 0.0038, 0.011, 0.051, 0.133, 0.275,
+                   0.431, 0.592, 0.73, 0.831, 0.876])
+
 plt.figure(2)
 plt.plot(gray,Im[0],label="I_0th")
 plt.plot(gray,Im[1],label="I_1th")
 plt.plot(gray,Im[2],label="I_2th")
+
+plt.plot(gray_y,y_data ,label="Exp I_0th",linestyle='dotted',marker="o")
+# plt.plot(gray,Im[1],label="I_1th")
 plt.legend(loc="best")
 plt.grid(True, linestyle='--')
 plt.show()

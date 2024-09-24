@@ -14,7 +14,7 @@ from matplotlib.ticker import MultipleLocator
 x=np.linspace(-0.5, 0.5,640)  # linear
 x_=np.linspace(0, 0.5,320)    #nonlinear
 
-M=[1.25,1.007,0.5]
+M=[0.8,1.007,0.5]
 A=1000
 AL=1000
 AR=1000

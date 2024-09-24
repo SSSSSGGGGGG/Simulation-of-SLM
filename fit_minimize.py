@@ -65,7 +65,7 @@ max_iterations = 100
 iteration = 0
 
 while rmse_opt > target_rmse and iteration < max_iterations:
-    result = minimize(objective_function, initial_guess, args=(gray, y_data), bounds=bounds)
+    result = minimize(objective_function, initial_guess, method='SLSQP',args=(gray, y_data), bounds=bounds)
     B_opt, M_opt, A_opt = result.x
     y_fitted_opt = linearModel(gray, B_opt, M_opt, A_opt)
     rmse_opt = np.sqrt(np.mean((y_data - y_fitted_opt) ** 2))
