@@ -10,55 +10,47 @@ import scipy as sy
 import sympy as sp
 import matplotlib.pyplot as plt
 from matplotlib.ticker import MultipleLocator
-# AL, AR, B, M, x,p=sp.symbols("Al AR B M x p")
-x=np.linspace(-0.5, 0.5,640)  # linear
-x_=np.linspace(0, 0.5,320)    #nonlinear
-
+"""
+In this section, we only simulate the influence of parameter B on the phase profile keeping other parameters constant, and how they affect the normalized intensities of the 0th order and the 1st orders.
+1. B is in the range of [0.1, 6, 3]
+2. AL and AR are 1000, and M is 1.007, respectively.
+3. The functions and variables are the same as in the simulation for parameters AL/AR.
+"""
+B=[0.1,6,3]
 M=1.007
-A=1000
 AL=1000
 AR=AL
-
-p=1
-B=[0.1,6,3]
 a=[0.964,1,0.7]
+A=1000
 m=[0,1,-1]
-gray=np.arange(0,256,1)
-# Phase profile for the linear
-
-# define nonlinear f_1, f is normalized, which affects phase profile a lot
-ac=[]
-#[[] for _ in range(len(m))]
+p=1
+gray=np.arange(0,256,1)     
+x=np.linspace(-0.5, 0.5,640)  
+x_=np.linspace(0, 0.5,320)  
+ac=[]   
 for a_ in range (len(a)):
-    f_linear=2*x/p
-    Mc = []
-    for n in range(len(B)):
-        
-        
+    f_linear=2*x/p    
+    Mc = []     
+    for n in range(len(B)): 
         f_1=np.arctan(B[n]*(f_linear/2))
         max_index_1 = np.argmax(f_1)
         max_value_1 = f_1[max_index_1]
         f_n=f_1/max_value_1
-        # equation=M*sp.atan(AL*sp.cos(f) )
-        # print(f"Equation: {equation}")
         
         PhaseProfile=np.arctan(A*np.cos(f_linear*np.pi))/(np.pi)
         max_index = np.argmax(PhaseProfile)
         max_value = PhaseProfile[max_index]
         
-        # Phase profile for the positive/right
         f_=np.arctan(B[n]*(x_/p))
         max_index_ = np.argmax(f_)
         max_value_ = f_[max_index_]
         f_L=f_/max_value_
     
-    
         PhaseProfile_L=np.arctan(AL*np.cos(f_L*np.pi))/(np.pi)
         max_index_L = np.argmax(PhaseProfile_L)
         max_value_L = PhaseProfile_L[max_index_L]
         PhaseProfile_L=PhaseProfile_L/max_value_L
-        
-        # Phase profile for the negtive/left            
+                 
         f_r=np.arctan(B[n]*(-x_/p))
         min_index_r = np.argmin(f_r)
         min_value_r = f_r[min_index_r]
@@ -68,15 +60,8 @@ for a_ in range (len(a)):
         max_index_R = np.argmax(PhaseProfile_R)
         max_value_R = PhaseProfile_R[max_index_R]
         PhaseProfile_R=PhaseProfile_R/max_value_R
-        
-        # combine L and R together
-        # PhaseProfile_n=[0] * (len(x_)+1)
-        # PhaseProfile_n[-1:] = PhaseProfile_L[::-1]
+       
         PhaseProfile_n=np.concatenate((PhaseProfile_L[::-1], PhaseProfile_R))
-        
-        
-        
-        
         
         pixelation=[0] * len(x)
         for i in range(len(x)):
@@ -85,10 +70,7 @@ for a_ in range (len(a)):
             elif x[i]>-len(x)/2 and x[i]<-a[a_]/2:
                 pixelation[i]=0
             else:
-                pixelation[i]=1
-                
-    
-    
+                pixelation[i]=1       
         PhaseProfile_M=PhaseProfile_n*M
         mc=[]       
         for k in range(len(m)):        
@@ -104,9 +86,8 @@ for a_ in range (len(a)):
         Im=mc*np.conjugate(mc)/len(x)**2 
         Mc.append(Im)
     ac.append(Mc)
-# print(Im)
 
-plt.figure(2)
+plt.figure()
 plt.plot(gray,ac[0][0][0],label=f"B={B[0]},a={a[0]},order={m[0]}")
 plt.plot(gray,ac[0][0][1],label=f"B={B[0]},a={a[0]},order={m[1]}")
 plt.plot(gray,ac[0][0][2],label=f"B={B[0]},a={a[0]},order={m[2]}")
