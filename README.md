@@ -1,0 +1,1 @@
+Simulates the phase response and diffraction behavior of phase-only spatial light modulators (SLMs). Includes nonlinear phase modulation retrieval and evaluation of fringing effect of SLM using least-squares fitting and inverse problem-solving.
